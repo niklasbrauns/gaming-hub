@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kaiserglück — Precision is No Accident</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0e1712;
+    --forest:#132018;
+    --forest-deep:#0a120d;
+    --brass:#c9a24b;
+    --brass-bright:#e6c878;
+    --cream:#f2ede1;
+    --line:rgba(242,237,225,0.14);
+    --red:#8c2f2f;
+    --radius:2px;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--forest-deep);
+    color:var(--cream);
+    font-family:'Space Grotesk', sans-serif;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  .display{font-family:'Fraunces', serif;}
+
+  .grid-bg{
+    position:fixed; inset:0; pointer-events:none; z-index:0;
+    background-image:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size: 64px 64px;
+    opacity:0.3;
+  }
+
+  /* ambient glow that drifts behind hero */
+  .glow{
+    position:absolute; border-radius:50%;
+    background:radial-gradient(circle, rgba(201,162,75,0.18) 0%, transparent 70%);
+    filter:blur(10px); pointer-events:none;
+  }
+  .glow-1{width:600px; height:600px; top:-200px; right:-150px; animation:drift1 18s ease-in-out infinite;}
+  .glow-2{width:400px; height:400px; bottom:-150px; left:-100px; animation:drift2 22s ease-in-out infinite;}
+  @keyframes drift1{ 0%,100%{transform:translate(0,0);} 50%{transform:translate(-40px,40px);} }
+  @keyframes drift2{ 0%,100%{transform:translate(0,0);} 50%{transform:translate(30px,-30px);} }
+
+  a{color:inherit; text-decoration:none;}
+  .wrap{max-width:1180px; margin:0 auto; padding:0 32px; position:relative; z-index:1;}
+
+  /* fade-up reveal on scroll */
+  .reveal{opacity:0; transform:translateY(28px); transition:opacity .8s cubic-bezier(.16,1,.3,1), transform .8s cubic-bezier(.16,1,.3,1);}
+  .reveal.in{opacity:1; transform:translateY(0);}
+  .reveal.d1{transition-delay:.08s;}
+  .reveal.d2{transition-delay:.16s;}
+  .reveal.d3{transition-delay:.24s;}
+  .reveal.d4{transition-delay:.32s;}
+  .reveal.d5{transition-delay:.4s;}
+  .reveal.d6{transition-delay:.48s;}
+
+  /* ===== NAV ===== */
+  nav{
+    position:sticky; top:0; z-index:50;
+    background:rgba(10,18,13,0.85);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line);
+    transition:border-color .3s;
+  }
+  nav .wrap{display:flex; align-items:center; justify-content:space-between; height:76px;}
+  .brand{display:flex; align-items:center; gap:12px; font-family:'Fraunces', serif; font-size:1.3rem; font-weight:600; letter-spacing:0.02em;}
+  .brand-mark{width:30px; height:30px; flex-shrink:0; animation:markspin 24s linear infinite;}
+  @keyframes markspin{ to{transform:rotate(360deg);} }
+  .navlinks{display:flex; gap:36px; font-size:0.85rem; letter-spacing:0.04em; text-transform:uppercase;}
+  .navlinks a{opacity:0.75; transition:opacity .2s; position:relative; padding-bottom:4px;}
+  .navlinks a:hover{opacity:1;}
+  .navlinks a::after{content:''; position:absolute; left:0; bottom:0; width:0; height:1px; background:var(--brass); transition:width .25s;}
+  .navlinks a:hover::after{width:100%;}
+  .btn{
+    display:inline-flex; align-items:center; gap:8px;
+    padding:12px 26px; font-size:0.85rem; letter-spacing:0.04em; text-transform:uppercase;
+    border:1px solid var(--brass); border-radius:var(--radius);
+    transition:all .25s; cursor:pointer; background:none;
+    position:relative; overflow:hidden;
+  }
+  .btn-primary{background:var(--brass); color:var(--forest-deep); font-weight:600;}
+  .btn-primary::before{
+    content:''; position:absolute; inset:0; background:var(--brass-bright);
+    transform:translateX(-100%); transition:transform .3s ease;
+  }
+  .btn-primary:hover::before{transform:translateX(0);}
+  .btn-primary span{position:relative; z-index:1; display:flex; align-items:center; gap:8px;}
+  .btn-ghost{color:var(--cream);}
+  .btn-ghost:hover{background:rgba(201,162,75,0.1); border-color:var(--brass-bright);}
+
+  /* ===== HERO ===== */
+  .hero{
+    position:relative; padding:120px 0 100px;
+    border-bottom:1px solid var(--line);
+    overflow:hidden;
+  }
+  .hero-grid{display:grid; grid-template-columns:1.1fr 0.9fr; gap:64px; align-items:center; position:relative; z-index:2;}
+  .eyebrow{
+    display:inline-flex; align-items:center; gap:10px;
+    font-size:0.78rem; letter-spacing:0.14em; text-transform:uppercase;
+    color:var(--brass-bright); margin-bottom:28px;
+  }
+  .eyebrow::before{content:''; width:22px; height:1px; background:var(--brass-bright);}
+  h1{
+    font-family:'Fraunces', serif; font-weight:600;
+    font-size:clamp(2.6rem, 5.4vw, 4.4rem);
+    line-height:1.03; letter-spacing:-0.01em;
+    margin-bottom:28px;
+  }
+  .line-wrap{overflow:hidden; display:block;}
+  .line-in{display:block; transform:translateY(110%); animation:lineUp .9s cubic-bezier(.16,1,.3,1) forwards;}
+  .line-wrap:nth-child(1) .line-in{animation-delay:.1s;}
+  .line-wrap:nth-child(2) .line-in{animation-delay:.22s;}
+  @keyframes lineUp{ to{transform:translateY(0);} }
+  h1 em{font-style:italic; color:var(--brass-bright); font-weight:500;}
+  .hero-sub{
+    font-size:1.08rem; line-height:1.7; opacity:0.78; max-width:46ch; margin-bottom:40px;
+  }
+  .hero-cta{display:flex; gap:16px; flex-wrap:wrap; margin-bottom:36px;}
+  .trust-row{display:flex; gap:28px; flex-wrap:wrap; font-size:0.78rem; opacity:0.6; letter-spacing:0.02em;}
+  .trust-row span{display:flex; align-items:center; gap:8px;}
+  .dot{width:5px; height:5px; border-radius:50%; background:var(--brass); animation:pulse 2.4s ease-in-out infinite;}
+  @keyframes pulse{ 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+
+  /* signature wheel */
+  .wheel-stage{position:relative; aspect-ratio:1/1; display:flex; align-items:center; justify-content:center;}
+  .wheel-ring{
+    position:absolute; inset:0; border-radius:50%;
+    border:1px solid var(--line);
+  }
+  .wheel-ring.r2{inset:36px; border-color:rgba(201,162,75,0.25);}
+  .wheel-ring.r3{inset:-24px; border-color:rgba(201,162,75,0.08); animation:pulsering 4s ease-in-out infinite;}
+  @keyframes pulsering{ 0%,100%{transform:scale(1); opacity:0.5;} 50%{transform:scale(1.04); opacity:0.9;} }
+  #wheel{width:100%; height:100%; animation:spin 32s linear infinite;}
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+  .wheel-center{
+    position:absolute; width:64px; height:64px; border-radius:50%;
+    background:var(--brass); display:flex; align-items:center; justify-content:center;
+    box-shadow:0 0 0 6px var(--forest-deep), 0 0 0 7px var(--line), 0 0 30px rgba(201,162,75,0.4);
+    animation:centerbeat 2.4s ease-in-out infinite;
+  }
+  @keyframes centerbeat{ 0%,100%{ box-shadow:0 0 0 6px var(--forest-deep), 0 0 0 7px var(--line), 0 0 30px rgba(201,162,75,0.4); } 50%{ box-shadow:0 0 0 6px var(--forest-deep), 0 0 0 7px var(--line), 0 0 46px rgba(201,162,75,0.7); } }
+  .wheel-center::before{
+    content:'K'; font-family:'Fraunces', serif; font-weight:700; color:var(--forest-deep); font-size:1.4rem;
+  }
+  .chip{
+    position:absolute; width:30px; height:30px; border-radius:50%;
+    border:2px dashed var(--brass-bright); opacity:0.8;
+  }
+  .chip-1{top:6%; left:0%; animation:orbit1 12s linear infinite;}
+  .chip-2{bottom:8%; right:2%; animation:orbit2 16s linear infinite reverse;}
+  @keyframes orbit1{ 0%{transform:translateY(0) rotate(0deg);} 50%{transform:translateY(-14px) rotate(180deg);} 100%{transform:translateY(0) rotate(360deg);} }
+  @keyframes orbit2{ 0%{transform:translateY(0) rotate(0deg);} 50%{transform:translateY(14px) rotate(180deg);} 100%{transform:translateY(0) rotate(360deg);} }
+
+  /* ===== MARQUEE STRIP ===== */
+  .strip{
+    background:var(--brass); color:var(--forest-deep);
+    padding:14px 0; overflow:hidden; white-space:nowrap;
+    border-bottom:1px solid var(--line);
+  }
+  .strip-track{display:inline-flex; gap:48px; animation:scroll 26s linear infinite; font-size:0.85rem; letter-spacing:0.08em; text-transform:uppercase; font-weight:600;}
+  @keyframes scroll{ from{transform:translateX(0);} to{transform:translateX(-50%);} }
+
+  /* ===== SECTION SCAFFOLD ===== */
+  section{padding:110px 0; position:relative; border-bottom:1px solid var(--line);}
+  .section-head{display:flex; justify-content:space-between; align-items:flex-end; gap:40px; margin-bottom:64px; flex-wrap:wrap;}
+  .section-label{font-size:0.78rem; letter-spacing:0.14em; text-transform:uppercase; color:var(--brass-bright); margin-bottom:14px; display:block;}
+  h2{font-family:'Fraunces', serif; font-weight:600; font-size:clamp(2rem, 3.4vw, 2.9rem); letter-spacing:-0.01em; max-width:16ch;}
+  .section-note{max-width:34ch; font-size:0.95rem; opacity:0.65; line-height:1.6;}
+
+  /* ===== GAMES GRID ===== */
+  .games-grid{display:grid; grid-template-columns:repeat(3, 1fr); gap:1px; background:var(--line); border:1px solid var(--line);}
+  .game-card{
+    background:var(--forest); padding:40px 32px; position:relative;
+    transition:background .35s, transform .35s;
+    overflow:hidden;
+  }
+  .game-card::before{
+    content:''; position:absolute; left:0; top:0; width:2px; height:0;
+    background:var(--brass-bright); transition:height .4s ease;
+  }
+  .game-card:hover{background:#182a1e; transform:translateY(-4px);}
+  .game-card:hover::before{height:100%;}
+  .game-index{font-family:'Fraunces', serif; font-size:0.8rem; color:var(--brass); opacity:0.7; margin-bottom:24px; display:block;}
+  .game-card h3{font-family:'Fraunces', serif; font-size:1.35rem; font-weight:500; margin-bottom:12px;}
+  .game-card p{font-size:0.9rem; opacity:0.65; line-height:1.6;}
+
+  /* ===== BONUS BAND ===== */
+  .bonus{
+    background:linear-gradient(135deg, var(--forest) 0%, var(--forest-deep) 100%);
+  }
+  .bonus-panel{
+    border:1px solid var(--brass); border-radius:var(--radius);
+    padding:64px; display:grid; grid-template-columns:1fr auto; gap:48px; align-items:center;
+    position:relative; overflow:hidden;
+  }
+  .bonus-panel::before{
+    content:''; position:absolute; top:-1px; left:32px; right:32px; height:1px;
+    background:var(--brass-bright);
+  }
+  .bonus-panel::after{
+    content:''; position:absolute; width:200%; height:200%; top:-50%; left:-50%;
+    background:conic-gradient(from 0deg, transparent, rgba(201,162,75,0.06), transparent 30%);
+    animation:sweep 8s linear infinite; pointer-events:none;
+  }
+  @keyframes sweep{ to{ transform:rotate(360deg); } }
+  .bonus-num{font-family:'Fraunces', serif; font-size:clamp(3rem,7vw,5.2rem); font-weight:700; color:var(--brass-bright); line-height:1; position:relative; z-index:1;}
+  .bonus-copy{position:relative; z-index:1;}
+  .bonus-copy p{opacity:0.7; margin-top:10px; max-width:40ch; line-height:1.6;}
+
+  /* ===== TRUST / LICENSE ===== */
+  .trust-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:40px;}
+  .trust-item{padding:28px 0; border-top:1px solid var(--line); transition:border-color .3s;}
+  .trust-item:hover{border-color:var(--brass);}
+  .trust-item h4{font-family:'Fraunces', serif; font-size:1.05rem; font-weight:500; margin-bottom:10px;}
+  .trust-item p{font-size:0.85rem; opacity:0.6; line-height:1.6;}
+
+  /* ===== STEPS ===== */
+  .steps{display:grid; grid-template-columns:repeat(3,1fr); gap:48px;}
+  .step-num{
+    font-family:'Fraunces', serif; font-size:0.9rem; color:var(--brass-bright);
+    border:1px solid var(--brass); width:34px; height:34px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center; margin-bottom:24px;
+    transition:background .3s, color .3s;
+  }
+  .step:hover .step-num{background:var(--brass); color:var(--forest-deep);}
+  .step h3{font-family:'Fraunces', serif; font-size:1.2rem; font-weight:500; margin-bottom:10px;}
+  .step p{font-size:0.9rem; opacity:0.65; line-height:1.65;}
+
+  /* ===== RESPONSIBLE GAMING ===== */
+  .responsible{background:var(--forest);}
+  .resp-box{
+    border:1px solid var(--line); padding:44px; border-radius:var(--radius);
+    display:grid; grid-template-columns:auto 1fr; gap:32px; align-items:flex-start;
+  }
+  .resp-icon{
+    width:44px; height:44px; border:1px solid var(--brass); border-radius:50%;
+    display:flex; align-items:center; justify-content:center; flex-shrink:0;
+    font-family:'Fraunces', serif; color:var(--brass-bright); font-size:1.1rem;
+  }
+  .resp-box h3{font-family:'Fraunces', serif; font-weight:500; font-size:1.2rem; margin-bottom:10px;}
+  .resp-box p{font-size:0.9rem; line-height:1.7; opacity:0.7; max-width:70ch;}
+  .resp-links{display:flex; gap:24px; margin-top:18px; flex-wrap:wrap; font-size:0.8rem;}
+  .resp-links a{border-bottom:1px solid var(--brass); padding-bottom:2px; color:var(--brass-bright); transition:opacity .2s;}
+  .resp-links a:hover{opacity:0.7;}
+
+  /* ===== FOOTER ===== */
+  footer{padding:60px 0 40px;}
+  .foot-top{display:flex; justify-content:space-between; align-items:flex-start; gap:40px; flex-wrap:wrap; margin-bottom:48px;}
+  .foot-cols{display:flex; gap:64px; flex-wrap:wrap;}
+  .foot-col h5{font-size:0.75rem; letter-spacing:0.1em; text-transform:uppercase; opacity:0.5; margin-bottom:16px;}
+  .foot-col a{display:block; font-size:0.88rem; opacity:0.75; margin-bottom:10px; transition:opacity .2s;}
+  .foot-col a:hover{opacity:1;}
+  .foot-legal{font-size:0.75rem; opacity:0.4; line-height:1.7; border-top:1px solid var(--line); padding-top:28px; max-width:90ch;}
+
+  /* ===== RESPONSIVE ===== */
+  @media (max-width:900px){
+    .navlinks{display:none;}
+    .hero-grid{grid-template-columns:1fr;}
+    .wheel-stage{max-width:280px; margin:0 auto;}
+    .games-grid{grid-template-columns:1fr;}
+    .bonus-panel{grid-template-columns:1fr; text-align:left; padding:40px;}
+    .trust-grid{grid-template-columns:1fr 1fr;}
+    .steps{grid-template-columns:1fr;}
+    .resp-box{grid-template-columns:1fr;}
+    section{padding:70px 0;}
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    #wheel, .strip-track, .glow-1, .glow-2, .brand-mark, .dot, .wheel-ring.r3, .wheel-center, .bonus-panel::after, .chip-1, .chip-2, .line-in{animation:none; opacity:1; transform:none;}
+    .reveal{opacity:1; transform:none; transition:none;}
+  }
+
+  a:focus-visible, button:focus-visible{outline:2px solid var(--brass-bright); outline-offset:3px;}
+</style>
+</head>
+<body>
+
+<div class="grid-bg"></div>
+
+<nav>
+  <div class="wrap">
+    <div class="brand">
+      <svg class="brand-mark" viewBox="0 0 30 30" fill="none">
+        <circle cx="15" cy="15" r="14" stroke="#c9a24b" stroke-width="1"/>
+        <circle cx="15" cy="15" r="4" fill="#c9a24b"/>
+        <line x1="15" y1="1" x2="15" y2="7" stroke="#c9a24b" stroke-width="1"/>
+        <line x1="15" y1="23" x2="15" y2="29" stroke="#c9a24b" stroke-width="1"/>
+        <line x1="1" y1="15" x2="7" y2="15" stroke="#c9a24b" stroke-width="1"/>
+        <line x1="23" y1="15" x2="29" y2="15" stroke="#c9a24b" stroke-width="1"/>
+      </svg>
+      Kaiserglück
+    </div>
+    <div class="navlinks">
+      <a href="#games">Games</a>
+      <a href="#bonus">Bonus</a>
+      <a href="#trust">Security</a>
+      <a href="#responsible">Player Protection</a>
+    </div>
+    <a href="#" class="btn btn-primary"><span>Open Account</span></a>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="glow glow-1"></div>
+  <div class="glow glow-2"></div>
+  <div class="wrap hero-grid">
+    <div>
+      <span class="eyebrow reveal in">Licensed Online Casino</span>
+      <h1>
+        <span class="line-wrap"><span class="line-in">Precision is</span></span>
+        <span class="line-wrap"><span class="line-in"><em>no accident.</em></span></span>
+      </h1>
+      <p class="hero-sub reveal in d1">Kaiserglück pairs old-world casino elegance with the exacting standards of German engineering. Fair payout rates, audited software, and a table that's always ready.</p>
+      <div class="hero-cta reveal in d2">
+        <a href="#" class="btn btn-primary"><a href="https://nv-gambling.net/en-de/"><span>Play at NV Gambling</span></a></a>
+        <a href="#games" class="btn btn-ghost">Explore Games →</a>
+      </div>
+      <div class="trust-row reveal in d3">
+        <span><span class="dot"></span>Regulated Operator</span>
+        <span><span class="dot"></span>SSL Encrypted</span>
+        <span><span class="dot"></span>Payouts in 24h</span>
+      </div>
+    </div>
+    <div class="wheel-stage">
+      <div class="wheel-ring r3"></div>
+      <div class="wheel-ring"></div>
+      <div class="wheel-ring r2"></div>
+      <div class="chip chip-1"></div>
+      <div class="chip chip-2"></div>
+      <svg id="wheel" viewBox="0 0 200 200">
+        <g fill="none" stroke="#c9a24b" stroke-width="1" opacity="0.9">
+          <circle cx="100" cy="100" r="88"/>
+          <circle cx="100" cy="100" r="70"/>
+        </g>
+        <g id="ticks"></g>
+      </svg>
+      <div class="wheel-center"></div>
+    </div>
+  </div>
+</header>
+
+<div class="strip">
+  <div class="strip-track">
+    <span>European Roulette</span><span>·</span>
+    <span>Blackjack Perfect</span><span>·</span>
+    <span>Baccarat Chemin de Fer</span><span>·</span>
+    <span>Live Dealers from Baden-Baden</span><span>·</span>
+    <span>European Roulette</span><span>·</span>
+    <span>Blackjack Perfect</span><span>·</span>
+    <span>Baccarat Chemin de Fer</span><span>·</span>
+    <span>Live Dealers from Baden-Baden</span><span>·</span>
+  </div>
+</div>
+
+<section id="games">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <div>
+        <span class="section-label">The Offering</span>
+        <h2>Six tables. One standard.</h2>
+      </div>
+      <p class="section-note">Every game is independently audited and regularly tested for fairness by external inspection bodies.</p>
+    </div>
+    <div class="games-grid">
+      <div class="game-card reveal d1">
+        <span class="game-index">01 — Table</span>
+        <h3>European Roulette</h3>
+        <p>Single zero, classic rules, 97.3% payout rate. Streamed live with real croupiers at the wheel.</p>
+      </div>
+      <div class="game-card reveal d2">
+        <span class="game-index">02 — Table</span>
+        <h3>Blackjack Perfect</h3>
+        <p>Six decks, doubling and splitting allowed, house edge under 0.5% with optimal strategy.</p>
+      </div>
+      <div class="game-card reveal d3">
+        <span class="game-index">03 — Table</span>
+        <h3>Baccarat Chemin de Fer</h3>
+        <p>The quietest table in the house. Simple rules, low commission, high limits available.</p>
+      </div>
+      <div class="game-card reveal d4">
+        <span class="game-index">04 — Studio</span>
+        <h3>Live Dealer Suite</h3>
+        <p>Broadcast directly from our Baden-Baden studio, in HD, with English-speaking hosts.</p>
+      </div>
+      <div class="game-card reveal d5">
+        <span class="game-index">05 — Slots</span>
+        <h3>Curated Slots</h3>
+        <p>Over 400 titles from European developers, hand-picked rather than endlessly listed.</p>
+      </div>
+      <div class="game-card reveal d6">
+        <span class="game-index">06 — Poker</span>
+        <h3>Texas Hold'em Rooms</h3>
+        <p>Daily tournaments and cash games, from beginner tables to high-limit rooms.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="bonus" class="bonus">
+  <div class="wrap">
+    <div class="bonus-panel reveal">
+      <div class="bonus-copy">
+        <span class="section-label">Welcome Offer</span>
+        <div class="bonus-num">100%</div>
+        <p>match up to €500 on your first deposit, plus 50 free spins. No hidden terms — wagering requirements are laid out clearly on a single page.</p>
+      </div>
+      <a href="#" class="btn btn-primary"><span>Claim Bonus</span></a>
+    </div>
+  </div>
+</section>
+
+<section id="steps">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <div>
+        <span class="section-label">It Starts Simply</span>
+        <h2>Three steps to your first hand.</h2>
+      </div>
+    </div>
+    <div class="steps">
+      <div class="step reveal d1">
+        <div class="step-num">1</div>
+        <h3>Open an account</h3>
+        <p>Registration takes under two minutes, with mandatory age verification.</p>
+      </div>
+      <div class="step reveal d2">
+        <div class="step-num">2</div>
+        <h3>Make a deposit</h3>
+        <p>Instant bank transfer, card, or common e-wallets. Minimum deposit €10.</p>
+      </div>
+      <div class="step reveal d3">
+        <div class="step-num">3</div>
+        <h3>Sit down and play</h3>
+        <p>Choose a table, set a limit you're comfortable with, and begin.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="trust">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <div>
+        <span class="section-label">Security &amp; Regulation</span>
+        <h2>Audited, licensed, transparent.</h2>
+      </div>
+    </div>
+    <div class="trust-grid">
+      <div class="trust-item reveal d1">
+        <h4>Licensed Operator</h4>
+        <p>Regulated by the relevant gaming authority. Full license details are shown once your account is opened.</p>
+      </div>
+      <div class="trust-item reveal d2">
+        <h4>256-bit Encryption</h4>
+        <p>Every transaction and session is protected end-to-end.</p>
+      </div>
+      <div class="trust-item reveal d3">
+        <h4>Independent Auditing</h4>
+        <p>Payout rates are checked monthly by external inspection bodies and published openly.</p>
+      </div>
+      <div class="trust-item reveal d4">
+        <h4>Segregated Funds</h4>
+        <p>Player balances are held strictly separate from the company's operating capital.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="responsible" class="responsible">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <div>
+        <span class="section-label">Player Protection</span>
+        <h2>Control stays with you.</h2>
+      </div>
+    </div>
+    <div class="resp-box reveal">
+      <div class="resp-icon">18+</div>
+      <div>
+        <h3>Play Responsibly</h3>
+        <p>Gambling carries real risk. Kaiserglück is only for players aged 18 and over. You can set deposit, loss, and time limits on your account at any time, or take a temporary or permanent break. If gambling ever starts to feel like a burden, talk to someone — support is free and confidential.</p>
+        <div class="resp-links">
+          <a href="#">Set up self-exclusion</a>
+          <a href="#">Set limits</a>
+          <a href="#">Find support services</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-top">
+      <div class="brand" style="font-size:1.1rem;">Kaiserglück</div>
+      <div class="foot-cols">
+        <div class="foot-col">
+          <h5>Casino</h5>
+          <a href="#games">Games</a>
+          <a href="#bonus">Bonus</a>
+          <a href="#steps">How It Works</a>
+        </div>
+        <div class="foot-col">
+          <h5>Trust</h5>
+          <a href="#trust">Licensing &amp; Security</a>
+          <a href="#responsible">Player Protection</a>
+          <a href="#">Terms &amp; Conditions</a>
+        </div>
+        <div class="foot-col">
+          <h5>Support</h5>
+          <a href="#">Contact</a>
+          <a href="#">Help Center</a>
+          <a href="#">Payout Status</a>
+        </div>
+      </div>
+    </div>
+    <p class="foot-legal">
+      Kaiserglück is a fictional brand created as a design example for a casino landing page and does not represent a real, licensed gambling operator. Gambling is legal only for those 18 and over, and carries a risk of addiction. A real offering would need to display a valid, verifiable license from the relevant regulatory authority. If you or someone you know is struggling with gambling, confidential support is available through national problem-gambling helplines in most countries.
+    </p>
+  </div>
+</footer>
+
+<script>
+  // Generate roulette-style tick marks around the wheel
+  const ticksGroup = document.getElementById('ticks');
+  const total = 37;
+  for (let i = 0; i < total; i++) {
+    const angle = (i / total) * 2 * Math.PI;
+    const x1 = 100 + 80 * Math.cos(angle);
+    const y1 = 100 + 80 * Math.sin(angle);
+    const x2 = 100 + 88 * Math.cos(angle);
+    const y2 = 100 + 88 * Math.sin(angle);
+    const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+    line.setAttribute("x1", x1);
+    line.setAttribute("y1", y1);
+    line.setAttribute("x2", x2);
+    line.setAttribute("y2", y2);
+    line.setAttribute("stroke", i % 3 === 0 ? "#e6c878" : "#c9a24b");
+    line.setAttribute("stroke-width", i % 3 === 0 ? "1.6" : "0.8");
+    line.setAttribute("opacity", i % 3 === 0 ? "0.95" : "0.5");
+    ticksGroup.appendChild(line);
+  }
+
+  // Scroll-triggered reveal animations
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('in');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.15 });
+
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+</script>
+
+</body>
+</html>
